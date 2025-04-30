@@ -1,62 +1,68 @@
 import React, { useState, useEffect } from 'react';
 
 const CoinSelector = () => {
-    // State to store the list of coins
     const [coins, setCoins] = useState([]);
-    // State to store the selected coin
     const [selectedCoin, setSelectedCoin] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    // Fetch the list of available coins from your backend (or a third-party API)
     useEffect(() => {
-        // Replace with your actual API endpoint to fetch available coins
         const fetchCoins = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/coins'); // Update to your actual API endpoint
+                const response = await fetch('http://localhost:5000/api/coins'); // Replace with actual backend URL
                 const data = await response.json();
-                
+
                 if (response.ok) {
-                    setCoins(data.coins); // Assuming the response contains a 'coins' array
+                    setCoins(data.coins || []);
+                    setError('');
                 } else {
-                    console.error('Failed to fetch coins:', data.message);
+                    setError(data.message || 'Failed to load coins.');
                 }
-            } catch (error) {
-                console.error('Error fetching coins:', error);
+            } catch (err) {
+                setError('Network error: ' + err.message);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchCoins();
     }, []);
 
-    // Handle coin selection
-    const handleCoinSelect = (coin) => {
-        setSelectedCoin(coin);
-        console.log(`Selected Coin: ${coin}`);
+    const handleCoinSelect = (coinSymbol) => {
+        setSelectedCoin(coinSymbol);
+        console.log(`Selected Coin: ${coinSymbol}`);
     };
 
     return (
-        <div className="coin-selector">
-            <h2>Select a Cryptocurrency</h2>
-            
-            <div className="coin-list">
-                {coins.length > 0 ? (
-                    coins.map((coin) => (
+        <div className="p-4 bg-white rounded-lg shadow-md max-w-2xl mx-auto">
+            <h2 className="text-lg font-semibold mb-4">Select a Cryptocurrency</h2>
+
+            {loading ? (
+                <p className="text-gray-500">Loading coins...</p>
+            ) : error ? (
+                <p className="text-red-500">{error}</p>
+            ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {coins.map((coin) => (
                         <button
                             key={coin.id}
-                            className={`coin-item ${coin.symbol === selectedCoin ? 'selected' : ''}`}
+                            className={`flex flex-col items-center p-3 border rounded transition-all duration-200 ${
+                                selectedCoin === coin.symbol ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                            }`}
                             onClick={() => handleCoinSelect(coin.symbol)}
                         >
-                            <img src={coin.logoUrl} alt={coin.name} className="coin-logo" />
-                            <span>{coin.name} ({coin.symbol})</span>
+                            <img src={coin.logoUrl} alt={coin.name} className="w-10 h-10 mb-2 rounded-full" />
+                            <span className="text-sm font-medium text-gray-700 text-center">
+                                {coin.name} ({coin.symbol})
+                            </span>
                         </button>
-                    ))
-                ) : (
-                    <p>Loading coins...</p>
-                )}
-            </div>
+                    ))}
+                </div>
+            )}
 
             {selectedCoin && (
-                <div className="selected-coin">
-                    <h3>You have selected: {selectedCoin}</h3>
+                <div className="mt-6 p-3 bg-gray-100 rounded text-gray-800 font-semibold">
+                    ? You have selected: {selectedCoin}
                 </div>
             )}
         </div>

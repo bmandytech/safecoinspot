@@ -20,7 +20,7 @@ const App = () => {
   useEffect(() => {
     const fetchRecaptchaStatus = async () => {
       try {
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/get-recaptcha-status';
+        const apiUrl = process.env.REACT_APP_API_URL || 'https://safecoinspot-api.onrender.com/api/get-recaptcha-status';
         const response = await fetch(apiUrl);
         const data = await response.json();
         setRecaptchaEnabled(data.recaptchaEnabled);  // Assume response contains recaptchaEnabled flag
